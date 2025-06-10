@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: MicroserviceConfigServer
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/Achamanp/microservice-config
+          clone-on-start: true
+
+server:
+  port: 8484

@@ -1,0 +1,117 @@
+spring:
+  application:
+    name: FirstMicroServicesApplication
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/user_service
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  main:
+    web-application-type: reactive
+    allow-bean-definition-overriding: true
+  
+  config:
+    import: optional:configserver:http://localhost:8484
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-77388476.okta.com/oauth2/default
+      client:
+        registration:
+          my-internal-client:
+            provider: okta
+            authorization-grant-type: client_credentials
+            scope: internal
+            client-id: 0oap3w45q2jeW9YA85d7
+            client-secret: H0e1biqaTJMX1NahOkXmew3dLBe_lkJ1U4n4VA4krz4dZcHB-A_2EcDRI6lMXu6r
+        provider:
+          okta:
+            issuer-uri: https://dev-77388476.okta.com/oauth2/default
+
+logging:
+  level:
+    org.springframework: INFO
+    com.yourpackage: DEBUG
+    io.github.resilience4j: DEBUG
+
+server:
+  port: 8080
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health, ratelimiters, metrics
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ratingHotelBreaker:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 6s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+  retry:
+    instances:
+      ratingHotelService:
+        maxAttempts: 5
+        waitDuration: 2s
+
+  rate-limiter:
+    instances:
+      userRateLimiter:
+        limitRefreshPeriod: 4s
+        limitForPeriod: 2
+        timeoutDuration: 5s
+        registerHealthIndicator: true
+
+okta:
+  oauth2:
+    issuer: https://dev-77388476.okta.com/oauth2/default
+    audience: api://default
+
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka
+#    fetch-registry: true
+#    register-with-eureka: true
+#  instance:
+#    prefer-ip-address: true
+
+
+        
+
+
